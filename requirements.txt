@@ -1,0 +1,5 @@
+cherrypy
+Adafruit-Blinka
+adafruit-circuitpython-mcp9808
+adafruit-circuitpython-bme280
+uwsgi
