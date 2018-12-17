@@ -1,0 +1,13 @@
+[Unit]
+Description=uWSGI instance to server myweather
+After=network.target
+
+[Service]
+User=astropi
+Group=www-data
+WorkingDirectory=/home/astropi/workspace/myweather
+Environment="PATH=/home/astropi/.virtualenvs/weather/bin"
+ExecStart=/home/astropi/.virtualenvs/weather/bin/uwsgi --ini weather.ini
+
+[Install]
+WantedBy=multi-user.target

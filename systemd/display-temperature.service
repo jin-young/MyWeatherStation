@@ -1,0 +1,12 @@
+[Unit]
+Description=Display current temperature on 7-segments LED
+
+[Service]
+User=astropi
+Group=astropi
+WorkingDirectory=/home/astropi/workspace/myweather/
+Environment="PATH=/home/astropi/.virtualenvs/weather/bin"
+ExecStart=/home/astropi/.virtualenvs/weather/bin/python bin/display.py
+
+[Install]
+WantedBy=multi-user.target
