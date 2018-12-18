@@ -29,5 +29,10 @@ Note:
 * Code assumes that I2C address of BME280 is 0x77
 * Code assumes that all sensors are connected via I2C
 * To display current temperature on 7-segment display, the LED and controller should be connected via I2C
-  * run ```bin/display.py```
+  * run ```python bin/display.py```
   * temperature is updated every 15 seconds
+
+## Items
+* [MCP9808](https://www.adafruit.com/product/1782)
+* [BME280](https://www.adafruit.com/product/2652)
+* [Adafruit 0.56" 4-Digit 7-Segment Display w/I2C Backpack - Red](https://www.adafruit.com/product/878)
