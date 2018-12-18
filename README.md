@@ -20,7 +20,14 @@ The service provides environment data as JSON format
     },
     pressure: 1015.4940735556579,  # Hectopascal (hPa)
     humidity: 53.36025163466593,   # percentage (%)
+    delta: 0.78999   # temp from bme280 - temp from mcp9808
 }
 ```
 
-Note that temperature is read from MCP9808 because my BME280 showed a bit higher than actual temperature.
+Note:
+* temperature is read from MCP9808 because my BME280 showed a bit higher than actual temperature
+* Code assumes that I2C address of BME280 is 0x77
+* Code assumes that all sensors are connected via I2C
+* To display current temperature on 7-segment display, the LED and controller should be connected via I2C
+  * run ```bin/display.py```
+  * temperature is updated every 15 seconds
