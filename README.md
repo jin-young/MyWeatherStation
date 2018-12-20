@@ -34,5 +34,8 @@ Note:
 
 ## Items
 * [MCP9808](https://www.adafruit.com/product/1782)
+  * [wiring](https://learn.adafruit.com/adafruit-mcp9808-precision-i2c-temperature-sensor-guide/python-circuitpython)
 * [BME280](https://www.adafruit.com/product/2652)
+  * [wiring](https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout/python-circuitpython-test)
 * [Adafruit 0.56" 4-Digit 7-Segment Display w/I2C Backpack - Red](https://www.adafruit.com/product/878)
+  * [wiring](https://learn.adafruit.com/adafruit-led-backpack/0-dot-56-seven-segment-backpack)
