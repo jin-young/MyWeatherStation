@@ -7,6 +7,8 @@ Group=astropi
 WorkingDirectory=/home/astropi/workspace/myweather/
 Environment="PATH=/home/astropi/.virtualenvs/weather/bin"
 ExecStart=/home/astropi/.virtualenvs/weather/bin/python bin/display.py
+ExecStop=/usr/bin/killall /home/astropi/.virtualenvs/weather/bin/python
+ExecStop=/home/astropi/.virtualenvs/weather/bin/python bin/display_off.py
 
 [Install]
 WantedBy=multi-user.target
