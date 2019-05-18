@@ -1,11 +1,10 @@
-import cherrypy
-import time
 import board
 import busio
-import math
-
+import time
+from pyftdi.ftdi import Ftdi
+from pyftdi.i2c import I2cController
+from lib.sht31d import SHT31D_FTDI
 from adafruit_bme680 import Adafruit_BME680
-
 
 class Adafruit_BME680_PYFTDI(Adafruit_BME680):
     """Driver for I2C connected BME680 via FT232H. Powered by PyFtdi.
@@ -31,23 +30,30 @@ class Adafruit_BME680_PYFTDI(Adafruit_BME680):
         """Writes an array of 'length' bytes to the 'register'"""
         self._i2c.write_to(register, values)
 
+bme680 = None
+sht31d = None
 
-class Root(object):
-    def __init__(self, sensor, sensor2):
-        self._sensor = sensor
-        self._sensor2 = sensor2
+for i in range(0,3):
+    try:
+        i2c = I2cController()
+        i2c.configure('ftdi://ftdi:232h/1')
 
-    @cherrypy.expose
-    @cherrypy.tools.json_out()
-    def index(self):
-        return {
-            "temperature": (self._sensor.temperature + self._sensor2.temperature)/2,
-            "pressure": self._sensor.pressure,
-            "humidity": (self._sensor.humidity + self._sensor2.relative_humidity)/2,
-            "wind": {
-                "speed": 1.06,
-                "deg": 17.0003
-            },
-            "dt": int(time.time())
-        }
+        bme680 = Adafruit_BME680_PYFTDI(i2c)
+        sht31d = SHT31D_FTDI(i2c)
+        break
+    except Exception as e:
+        if i < 3:
+            print("could not acquire device. Retry")
+            print(e)
+            time.sleep(1)
+            continue
+        raise "could not acquire device"
+        
+while True:
+    print("SHT   : Temperature: %0.2f C" % sht31d.temperature)
+    print("680   : Temperature: %0.2f C" % bme680.temperature)
+    print("SHT   : Humidity: %0.2f %%" % sht31d.relative_humidity)
+    print("680   : Humidity: %0.2f %%" % bme680.humidity)
+    print("680   : Pressure: %0.2f hPascal" % bme680.pressure)
 
+    time.sleep(5)
