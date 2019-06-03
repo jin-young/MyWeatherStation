@@ -1,0 +1,13 @@
+[Unit]
+Description=Read environment data and record it into db
+After=network.target
+
+[Service]
+User=pi
+Group=pi
+WorkingDirectory=/home/pi/MyWeatherStation
+Environment="PATH=/home/pi/.virtualenvs/weather/bin"
+ExecStart=/home/pi/.virtualenvs/weather/bin/python ./bin/read_and_record.py >> ./log/cron.log 2>&1
+
+[Install]
+WantedBy=multi-user.target

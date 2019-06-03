@@ -4,3 +4,5 @@ adafruit-circuitpython-bme680
 uwsgi
 Adafruit-LED-Backpack
 pyftdi
+pytz
+tzlocal
