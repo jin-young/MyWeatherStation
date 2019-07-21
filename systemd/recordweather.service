@@ -7,7 +7,7 @@ User=pi
 Group=pi
 WorkingDirectory=/home/pi/MyWeatherStation
 Environment="PATH=/home/pi/.virtualenvs/weather/bin"
-ExecStart=/home/pi/.virtualenvs/weather/bin/python ./bin/read_and_record.py >> ./log/cron.log 2>&1
+ExecStart=/home/pi/.virtualenvs/weather/bin/python ./bin/read_and_record.py
 
 [Install]
 WantedBy=multi-user.target
