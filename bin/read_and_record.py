@@ -33,19 +33,23 @@ for i in range(0,3):
 if bme680 is None or sht31d is None:
     raise "could not acquire device"
     
-insert_sql = "INSERT INTO weather (temperature, humidity, pressure) VALUES (?, ?, ?);"
+insert_sql = "INSERT INTO weather (temperature, humidity, pressure, delta) VALUES (?, ?, ?, ?);"
 
 while True:
-    temp = (bme680.temperature + sht31d.temperature)/2
+    t_680 = bme680.temperature
+    t_31d = sht31d.temperature
+    delta = t_680 - t_31d
+    temp = (t_680 + t_31d)/2
     humi = (bme680.humidity + sht31d.relative_humidity)/2
     press = bme680.pressure
     print("============================================")
     print("Temperature: %0.2f C" % temp)
     print("Humidity: %0.2f %%" % humi)
-    print("Pressure: %0.2f hPa\n" % press)
+    print("Pressure: %0.2f hPa" % press)
+    print("Delta: %0.2f C\n" % delta)
 
     with contextlib.closing(sqlite3.connect(root_dir + '/db/weather.db')) as conn:
         with conn as cur:
-            cur.execute(insert_sql, (temp, humi, press))
+            cur.execute(insert_sql, (temp, humi, press, delta))
             
-    time.sleep(30)
+    time.sleep(60)
