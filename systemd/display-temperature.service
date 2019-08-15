@@ -2,13 +2,13 @@
 Description=Display current temperature on 7-segments LED
 
 [Service]
-User=astropi
-Group=astropi
-WorkingDirectory=/home/astropi/workspace/myweather/
-Environment="PATH=/home/astropi/.virtualenvs/weather/bin"
-ExecStart=/home/astropi/.virtualenvs/weather/bin/python bin/display.py
-ExecStop=/usr/bin/killall /home/astropi/.virtualenvs/weather/bin/python
-ExecStop=/home/astropi/.virtualenvs/weather/bin/python bin/display_off.py
+User=pi
+Group=pi
+WorkingDirectory=/home/pi/MyWeatherStation
+Environment="PATH=/home/pi/.virtualenvs/weather/bin"
+ExecStart=/home/pi/.virtualenvs/weather/bin/python bin/display.py
+ExecStop=/usr/bin/killall /home/pi/.virtualenvs/weather/bin/python
+ExecStop=/home/pi/.virtualenvs/weather/bin/python bin/display_off.py
 
 [Install]
 WantedBy=multi-user.target
