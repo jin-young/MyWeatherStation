@@ -6,3 +6,4 @@ Adafruit-LED-Backpack
 pyftdi
 pytz
 tzlocal
+psycopg2

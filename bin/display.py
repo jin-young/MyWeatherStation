@@ -2,9 +2,10 @@
 import time
 import board
 import busio
-import sqlite3
+import psycopg2
 from os import path
 import contextlib
+import datetime
 
 from Adafruit_LED_Backpack import SevenSegment
 
@@ -15,21 +16,34 @@ segment = SevenSegment.SevenSegment(address=0x70)
 segment.begin()
 
 while(True):
-  segment.clear()
-  
-  with contextlib.closing(sqlite3.connect(root_dir + '/db/weather.db', detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES)) as conn:
-    cur = conn.cursor()
-    cur.execute('SELECT temperature FROM weather ORDER BY id DESC limit 1')
-    record = cur.fetchone()
+    segment.clear()
+    segment.set_brightness(1)
+    conn = None
+    try:
+        conn = psycopg2.connect(host="localhost",database="weather", user="pi", password="...")
+        cur = conn.cursor()
+        cur.execute('SELECT t_sht31d, created_at FROM weather ORDER BY id DESC limit 1')
+        record = cur.fetchone()
+        
+        temp = record[0]
+        record_time = record[1]
+        t_diff = datetime.datetime.now().timestamp() - record_time.timestamp()
+
+        if (t_diff > 30):
+            segment.print_hex(0xFFFF)
+        else:
+            segment.print_float(temp, 1, False)
+            segment.set_digit(3, 'C', False)        # Ones
+        
+        # Write the display buffer to the hardware.  This must be called to
+        # update the actual display LEDs.
+        segment.write_display()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
     
-    temp = record[0]
-
-    segment.print_float(temp, 1, False)
-    segment.set_digit(3, 'C', False)        # Ones
-
-    # Write the display buffer to the hardware.  This must be called to
-    # update the actual display LEDs.
-    segment.write_display()
-
-  # Wait a quarter second (less than 1 second to prevent colon blinking getting$
-  time.sleep(10)
+    # Wait a quarter second (less than 1 second to prevent colon blinking getting$
+    time.sleep(10)
+  

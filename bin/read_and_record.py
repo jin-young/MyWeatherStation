@@ -1,6 +1,6 @@
 import sys
 import time
-import sqlite3
+import psycopg2
 import contextlib
 from pyftdi.ftdi import Ftdi
 from pyftdi.i2c import I2cController
@@ -33,23 +33,42 @@ for i in range(0,3):
 if bme680 is None or sht31d is None:
     raise "could not acquire device"
     
-insert_sql = "INSERT INTO weather (temperature, humidity, pressure, delta) VALUES (?, ?, ?, ?);"
+insert_sql = "INSERT INTO weather (t_bme680, t_sht31d, h_bme680, h_sht31d, pressure) VALUES (%s, %s, %s, %s, %s);"
+
+bme680.humidity_oversample = 16
 
 while True:
     t_680 = bme680.temperature
     t_31d = sht31d.temperature
     delta = t_680 - t_31d
     temp = (t_680 + t_31d)/2
-    humi = (bme680.humidity + sht31d.relative_humidity)/2
+    h_680 = bme680.humidity
+    h_31d = sht31d.relative_humidity
+    humi = (h_680 + h_31d)/2
     press = bme680.pressure
     print("============================================")
+    print("Temperature BEM680: %0.2f C" % t_680)
+    print("Temperature STD31H: %0.2f C" % t_31d)
     print("Temperature: %0.2f C" % temp)
+    print("Humidity BME680: %0.2f %%" % h_680)
+    print("Humidity STD31H: %0.2f %%" % h_31d)
     print("Humidity: %0.2f %%" % humi)
     print("Pressure: %0.2f hPa" % press)
     print("Delta: %0.2f C\n" % delta)
 
-    with contextlib.closing(sqlite3.connect(root_dir + '/db/weather.db')) as conn:
-        with conn as cur:
-            cur.execute(insert_sql, (temp, humi, press, delta))
+    try:
+        conn = psycopg2.connect(host="localhost",database="weather", user="pi", password="...")
+        cur = conn.cursor()
+        cur.execute(insert_sql, (t_680, t_31d, h_680, h_31d, press))
+        conn.commit()
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
             
-    time.sleep(60)
+    sht31d.heater = True
+    time.sleep(1)
+    sht31d.heater = False
+    time.sleep(9)

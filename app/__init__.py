@@ -1,7 +1,7 @@
 import cherrypy
 import time
 import math
-import sqlite3
+import psycopg2
 from os import path
 import contextlib
 root_dir = path.dirname(path.dirname(path.abspath(__file__)))
@@ -13,20 +13,26 @@ class Root(object):
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def index(self):
-        with contextlib.closing(sqlite3.connect(root_dir + '/db/weather.db', detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES)) as conn:
+        conn = None
+        try:
+            conn = psycopg2.connect(host="localhost",database="weather", user="pi", password="...")
             cur = conn.cursor()
-            cur.execute('SELECT temperature, pressure, humidity, delta, created_at "[timestamp]" FROM weather ORDER BY id DESC limit 1')
+            cur.execute('SELECT t_bme680, h_bme680, t_sht31d, h_sht31d, pressure, cast(created_at as varchar) FROM weather ORDER BY id DESC limit 1')
             record = cur.fetchone()
             
-            local_time = record[4].replace(tzinfo=timezone.utc).astimezone(tz=None)
+            #local_time = record[6].replace(tzinfo=timezone.utc).astimezone(tz=None)
                 
             return {
-                "temperature": record[0],
-                "pressure": record[1],
-                "humidity": record[2],
-                "delta": record[3],
-                "dt": local_time.strftime("%Y-%m-%d %H:%M:%S%z")
+                "temperature": float(record[2]),
+                "pressure": float(record[4]),
+                "humidity": float(record[3]),
+                "dt": record[5]
             }
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+        finally:
+            if conn is not None:
+                conn.close()
             
     @cherrypy.expose
     def trend(self, mins = 60):
@@ -42,22 +48,23 @@ class Root(object):
                   <div class="ct-chart ct-perfect-fourth"></div>
               """
                 
-            sql = """SELECT temperature, pressure, humidity, delta, created_at "[timestamp]"
+            sql = """SELECT t_bme680, t_sht31d, created_at "[timestamp]"
                      FROM weather 
                      WHERE created_at > datetime("now", "-{} minutes")""".format(mins)
                      
 
-            max = -100
-            min = 100
+            max = 30
+            min = 10 
             dat = ""
             for record in cur.execute(sql):
-                local_time = record[4].replace(tzinfo=timezone.utc).astimezone(tz=None)
-                dat += "{{x: new Date({}), y: {}}},\n".format(local_time.timestamp() * 1000, ("%0.2f" % record[0]))
-                if max < record[0]:
-                    max = record[0]
+                local_time = record[2].replace(tzinfo=timezone.utc).astimezone(tz=None)
+                temp = (record[0] + record[1])/2
+                dat += "{{x: new Date({}), y: {}}},\n".format(local_time.timestamp() * 1000, ("%0.2f" % temp))
+                if max < temp:
+                    max = temp 
                 
-                if min > record[0]:
-                    min = record[0]
+                if min > temp:
+                    min = temp
                 
             ticks = ""
             r = 0
